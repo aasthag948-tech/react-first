@@ -1,122 +1,114 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useCallback, useEffect } from "react";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [length, setLength] = useState(12);
+  const [upperCase, setUpperCase] = useState(true);
+  const [lowerCase, setLowerCase] = useState(true);
+  const [numbers, setNumbers] = useState(true);
+  const [symbols, setSymbols] = useState(false);
+  const [password, setPassword] = useState("");
+
+  const generatePassword = useCallback(() => {
+    let chars = "";
+
+    if (upperCase) chars += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    if (lowerCase) chars += "abcdefghijklmnopqrstuvwxyz";
+    if (numbers) chars += "0123456789";
+    if (symbols) chars += "!@#$%^&*()_+[]{}|;:,.<>?";
+
+    if (!chars) {
+      setPassword("");
+      return;
+    }
+
+    let pass = "";
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * chars.length);
+      pass += chars[randomIndex];
+    }
+
+    setPassword(pass);
+  }, [length, upperCase, lowerCase, numbers, symbols]);
+
+  useEffect(() => {
+    generatePassword();
+  }, [generatePassword]);
+
+  const copyPassword = async () => {
+    try {
+      await navigator.clipboard.writeText(password);
+      alert("Password copied!");
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
+    <div className="container">
+      <h1>Password Generator 🔐</h1>
+
+      <div className="box">
+        <input type="text" value={password} readOnly />
+        <button className="copy-btn" onClick={copyPassword}>
+          Copy
         </button>
-      </section>
+      </div>
 
-      <div className="ticks"></div>
+      <div className="controls">
+        <label>Password Length: {length}</label>
+        <input
+          type="range"
+          min="6"
+          max="30"
+          value={length}
+          onChange={(e) => setLength(Number(e.target.value))}
+        />
+      </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      <div className="options">
+        <label>
+          <input
+            type="checkbox"
+            checked={upperCase}
+            onChange={() => setUpperCase(!upperCase)}
+          />
+          Uppercase
+        </label>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        <label>
+          <input
+            type="checkbox"
+            checked={lowerCase}
+            onChange={() => setLowerCase(!lowerCase)}
+          />
+          Lowercase
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={numbers}
+            onChange={() => setNumbers(!numbers)}
+          />
+          Numbers
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={symbols}
+            onChange={() => setSymbols(!symbols)}
+          />
+          Symbols
+        </label>
+      </div>
+
+      <button className="generate-btn" onClick={generatePassword}>
+        Generate Password
+      </button>
+    </div>
+  );
 }
 
-export default App
+export default App;
